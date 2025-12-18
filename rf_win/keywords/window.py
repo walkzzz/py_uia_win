@@ -5,7 +5,7 @@
 提供窗口的获取、激活、最大化、最小化等关键字
 """
 
-from robot.api.deco import keyword, library
+from .. import keyword, library
 from ..services.window_service import WindowService
 from ..utils.logger import logger
 

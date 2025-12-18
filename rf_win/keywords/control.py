@@ -5,7 +5,7 @@
 提供控件的查找、点击、输入等关键字
 """
 
-from robot.api.deco import keyword, library
+from .. import keyword, library
 from ..services.control_service import ControlService
 from ..utils.logger import logger
 

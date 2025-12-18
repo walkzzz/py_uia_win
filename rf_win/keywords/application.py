@@ -5,7 +5,7 @@
 提供应用程序的启动、关闭、连接等关键字
 """
 
-from robot.api.deco import keyword, library
+from .. import keyword, library
 from ..services.application_service import ApplicationService
 from ..utils.logger import logger
 

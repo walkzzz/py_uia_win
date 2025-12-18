@@ -146,13 +146,13 @@ sys.modules['rf_win.drivers.automation_driver'] = type('rf_win.drivers.automatio
 
 try:
     # 现在尝试导入我们的库
-    from rf_win import RFWinLibrary
+    from rf_win import RFWin
     
-    print("✓ 成功导入RFWinLibrary")
+    print("✓ 成功导入RFWin")
     
     # 创建库实例
-    library = RFWinLibrary()
-    print("✓ 成功创建RFWinLibrary实例")
+    library = RFWin()
+    print("✓ 成功创建RFWin实例")
     
     # 检查关键字是否正确注册
     keywords = [

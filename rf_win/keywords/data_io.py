@@ -5,7 +5,7 @@
 提供读写文本、JSON、CSV、Excel文件的关键字
 """
 
-from robot.api.deco import keyword, library
+from .. import keyword, library
 from ..modules.data_io import DataIO
 from ..utils.logger import logger
 

@@ -733,3 +733,6 @@ class DriverFactory:
 
 # 创建驱动工厂实例
 driver_factory = DriverFactory()
+
+# 导出类
+export = AutomationDriver, PywinautoDriver, UIAutomationDriver, DriverFactory

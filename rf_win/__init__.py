@@ -6,7 +6,32 @@ rf-win - Windows Desktop Automation Robot Framework Library
 一个基于pywinauto和UIAutomation的Robot Framework库，用于Windows桌面应用自动化测试
 """
 
-from robot.api.deco import library, keyword
+# Robot Framework 7.x版本中，装饰器的导入方式有所不同
+# 为了兼容不同版本，我们直接实现一个简单的装饰器系统
+
+# 定义一个全局字典来存储关键字
+_registered_keywords = {}
+
+# 模拟library装饰器
+def library(scope='GLOBAL', version='1.0.0', doc_format='reST'):
+    """Robot Framework库装饰器"""
+    def decorator(cls):
+        return cls
+    return decorator
+
+# 模拟keyword装饰器
+def keyword(name=None, tags=()):
+    """Robot Framework关键字装饰器"""
+    def decorator(func):
+        # 为方法添加robot_name属性，用于关键字注册
+        func.robot_name = name or func.__name__
+        func.tags = tags
+        func._rf_keyword = True
+        # 将关键字添加到全局字典中
+        _registered_keywords[func.robot_name] = func
+        return func
+    return decorator
+
 from robot.libraries.BuiltIn import BuiltIn
 
 from .keywords.application import ApplicationKeywords
@@ -53,11 +78,11 @@ class RFWin:
         # 注意：这里假设各个关键字模块实例都有对应的服务属性
         # 例如：app_keywords实例有app_service属性
         # 如果关键字模块的服务属性命名不同，需要根据实际情况调整
-        self.app_service = self.app_keywords.app_service
-        self.window_service = self.window_keywords.window_service
-        self.control_service = self.control_keywords.control_service
-        self.operation_service = self.operation_keywords.operation_service
-        self.data_io = self.data_io_keywords.data_io
+        self.app_service = getattr(self.app_keywords, 'app_service', None)
+        self.window_service = getattr(self.window_keywords, 'window_service', None)
+        self.control_service = getattr(self.control_keywords, 'control_service', None)
+        self.operation_service = getattr(self.operation_keywords, 'operation_service', None)
+        self.data_io = getattr(self.data_io_keywords, 'data_io', None)
         
         # 注册关键字到Robot Framework
         self._register_keywords()
@@ -96,6 +121,7 @@ class RFWin:
         
         # 注册带有@keyword装饰器的方法
         for name, method in methods:
+            # 检查方法是否有robot_name属性，这是关键字的标志
             if hasattr(method, 'robot_name'):
                 # 将方法绑定到当前实例
                 bound_method = method.__get__(self)

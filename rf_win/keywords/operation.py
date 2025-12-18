@@ -5,7 +5,7 @@
 提供鼠标、键盘等操作关键字
 """
 
-from robot.api.deco import keyword, library
+from .. import keyword, library
 from ..services.operation_service import OperationService
 from ..utils.logger import logger
 
