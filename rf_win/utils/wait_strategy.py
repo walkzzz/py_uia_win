@@ -180,6 +180,24 @@ class WaitStrategy:
         return False
     
     @staticmethod
+    def wait_until(condition_func: Callable[[], bool], timeout: float = 30.0, error_message: str = "条件未满足") -> bool:
+        """等待直到条件满足或超时
+        
+        Args:
+            condition_func: 条件函数，返回True表示条件满足
+            timeout: 超时时间（秒）
+            error_message: 超时错误信息
+        
+        Returns:
+            条件是否在超时内满足
+        """
+        result = WaitStrategy._wait_until(condition_func, timeout, 0.5)
+        if not result:
+            from ..utils.logger import logger
+            logger.error(error_message)
+        return result
+    
+    @staticmethod
     def wait(seconds: float) -> None:
         """等待指定时长
         

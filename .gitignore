@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.pytest_cache/
+.tox/
+.coverage
+htmlcov/
+
+# Robot Framework
+test-results/
+output.xml
+log.html
+report.html
+*.png
+*.jpg
+*.jpeg
+
+# Logs
+logs/
+*.log
+
+# Test files
+*.robot
+notepad.txt
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Windows
+Thumbs.db
+.DS_Store
+
+# Environment
+.env
+.venv/
+env/
+
+# Build
+build/
+dist/

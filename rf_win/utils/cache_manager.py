@@ -192,3 +192,13 @@ control_cache = CacheManager(max_size=200, default_expire_time=10.0)
 
 # 定位器缓存：保存定位结果，过期时间5秒
 locator_cache = CacheManager(max_size=300, default_expire_time=5.0)
+
+# 主缓存管理器实例，用于通用缓存
+cache_manager = CacheManager(max_size=500, default_expire_time=15.0)
+
+# 为CacheManager类添加静态方法，方便外部调用
+CacheManager.application_cache = application_cache
+CacheManager.window_cache = window_cache
+CacheManager.control_cache = control_cache
+CacheManager.locator_cache = locator_cache
+CacheManager.cache_manager = cache_manager

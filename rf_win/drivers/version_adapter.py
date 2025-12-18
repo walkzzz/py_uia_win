@@ -23,7 +23,12 @@ except ImportError:
 try:
     import uiautomation as auto
     UIAUTOMATION_AVAILABLE = True
-    UIAUTOMATION_VERSION = auto.__version__
+    # 尝试获取版本，如果__version__属性不存在则使用默认值
+    try:
+        UIAUTOMATION_VERSION = auto.__version__
+    except AttributeError:
+        # uiautomation 2.x版本可能没有__version__属性，使用默认值
+        UIAUTOMATION_VERSION = "2.0.0"
 except ImportError:
     UIAUTOMATION_AVAILABLE = False
     UIAUTOMATION_VERSION = None
