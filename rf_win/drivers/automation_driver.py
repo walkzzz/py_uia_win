@@ -15,6 +15,20 @@ class AutomationDriver(ABC):
         pass
     
     @abstractmethod
+    def start_application(self, path: str, args: Optional[str] = None, backend: str = "uia") -> Any:
+        """启动应用程序
+        
+        Args:
+            path: 应用程序路径
+            args: 启动参数
+            backend: 后端类型
+        
+        Returns:
+            应用对象
+        """
+        pass
+    
+    @abstractmethod
     def create_application(self, app_id: str, backend: str = "uia") -> Any:
         """创建应用对象
         
@@ -37,6 +51,216 @@ class AutomationDriver(ABC):
         
         Returns:
             应用对象
+        """
+        pass
+    
+    @abstractmethod
+    def find_element(self, parent: Any, locator: Any, timeout: float = 10.0) -> Any:
+        """查找单个控件
+        
+        Args:
+            parent: 父控件或窗口对象
+            locator: 控件定位器
+            timeout: 超时时间
+        
+        Returns:
+            控件对象
+        """
+        pass
+    
+    @abstractmethod
+    def find_elements(self, parent: Any, locator: Any, timeout: float = 10.0) -> List[Any]:
+        """查找多个控件
+        
+        Args:
+            parent: 父控件或窗口对象
+            locator: 控件定位器
+            timeout: 超时时间
+        
+        Returns:
+            控件对象列表
+        """
+        pass
+    
+    @abstractmethod
+    def click_element(self, element: Any, button: str = "left", clicks: int = 1, interval: float = 0.0) -> bool:
+        """点击控件
+        
+        Args:
+            element: 控件对象
+            button: 鼠标按钮
+            clicks: 点击次数
+            interval: 点击间隔
+        
+        Returns:
+            是否成功
+        """
+        pass
+    
+    @abstractmethod
+    def type_text(self, element: Any, text: str, delay: float = 0.0) -> bool:
+        """向控件输入文本
+        
+        Args:
+            element: 控件对象
+            text: 要输入的文本
+            delay: 输入延迟
+        
+        Returns:
+            是否成功
+        """
+        pass
+    
+    @abstractmethod
+    def clear_element_text(self, element: Any) -> bool:
+        """清空控件文本
+        
+        Args:
+            element: 控件对象
+        
+        Returns:
+            是否成功
+        """
+        pass
+    
+    @abstractmethod
+    def set_element_text(self, element: Any, text: str) -> bool:
+        """设置控件文本
+        
+        Args:
+            element: 控件对象
+            text: 要设置的文本
+        
+        Returns:
+            是否成功
+        """
+        pass
+    
+    @abstractmethod
+    def get_element_text(self, element: Any) -> Optional[str]:
+        """获取控件文本
+        
+        Args:
+            element: 控件对象
+        
+        Returns:
+            控件文本
+        """
+        pass
+    
+    @abstractmethod
+    def get_element_attribute(self, element: Any, attribute: str) -> Optional[Any]:
+        """获取控件属性
+        
+        Args:
+            element: 控件对象
+            attribute: 属性名称
+        
+        Returns:
+            属性值
+        """
+        pass
+    
+    @abstractmethod
+    def is_control_valid(self, control: Any) -> bool:
+        """检查控件是否有效
+        
+        Args:
+            control: 控件对象
+        
+        Returns:
+            是否有效
+        """
+        pass
+    
+    @abstractmethod
+    def is_element_enabled(self, element: Any) -> bool:
+        """检查控件是否可用
+        
+        Args:
+            element: 控件对象
+        
+        Returns:
+            是否可用
+        """
+        pass
+    
+    @abstractmethod
+    def is_element_visible(self, element: Any) -> bool:
+        """检查控件是否可见
+        
+        Args:
+            element: 控件对象
+        
+        Returns:
+            是否可见
+        """
+        pass
+    
+    @abstractmethod
+    def hover_element(self, element: Any) -> bool:
+        """鼠标悬停在控件上
+        
+        Args:
+            element: 控件对象
+        
+        Returns:
+            是否成功
+        """
+        pass
+    
+    @abstractmethod
+    def drag_element_to(self, source_element: Any, target_element: Any) -> bool:
+        """拖拽控件到目标位置
+        
+        Args:
+            source_element: 源控件对象
+            target_element: 目标控件对象
+        
+        Returns:
+            是否成功
+        """
+        pass
+    
+    @abstractmethod
+    def select_element(self, element: Any, value: Any = None, text: Optional[str] = None, index: int = -1) -> bool:
+        """选择控件选项
+        
+        Args:
+            element: 控件对象
+            value: 选项值
+            text: 选项文本
+            index: 选项索引
+        
+        Returns:
+            是否成功
+        """
+        pass
+    
+    @abstractmethod
+    def deselect_element(self, element: Any, value: Any = None, text: Optional[str] = None, index: int = -1) -> bool:
+        """取消选择控件选项
+        
+        Args:
+            element: 控件对象
+            value: 选项值
+            text: 选项文本
+            index: 选项索引
+        
+        Returns:
+            是否成功
+        """
+        pass
+    
+    @abstractmethod
+    def is_element_selected(self, element: Any) -> bool:
+        """检查控件是否被选中
+        
+        Args:
+            element: 控件对象
+        
+        Returns:
+            是否被选中
         """
         pass
     
@@ -131,6 +355,15 @@ class PywinautoDriver(AutomationDriver):
     def name(self) -> str:
         return "pywinauto"
     
+    def start_application(self, path: str, args: Optional[str] = None, backend: str = "uia") -> Any:
+        """启动应用程序"""
+        from pywinauto import Application as PywinautoApp
+        app = PywinautoApp(backend=backend)
+        cmd = path
+        if args:
+            cmd += f" {args}"
+        return app.start(cmd)
+    
     def create_application(self, app_id: str, backend: str = "uia") -> Any:
         """创建pywinauto应用对象"""
         from pywinauto import Application as PywinautoApp
@@ -162,62 +395,164 @@ class PywinautoDriver(AutomationDriver):
         else:
             return app.window(**window_identifier)
     
-    def find_control(self, window: Any, locator: str, timeout: float = 10.0) -> Any:
-        """查找控件"""
+    def find_element(self, parent: Any, locator: Any, timeout: float = 10.0) -> Any:
+        """查找单个控件"""
         # 解析定位器
-        if locator.startswith("id="):
-            return window.child_window(auto_id=locator[3:], timeout=timeout)
-        elif locator.startswith("name="):
-            return window.child_window(name=locator[5:], timeout=timeout)
-        elif locator.startswith("class="):
-            return window.child_window(class_name=locator[6:], timeout=timeout)
-        elif locator.startswith("xpath="):
-            # pywinauto不直接支持XPath，这里做简单处理
-            return window.child_window(title=locator[6:], timeout=timeout)
+        if isinstance(locator, str):
+            if locator.startswith("id="):
+                return parent.child_window(auto_id=locator[3:], timeout=timeout)
+            elif locator.startswith("name="):
+                return parent.child_window(name=locator[5:], timeout=timeout)
+            elif locator.startswith("class="):
+                return parent.child_window(class_name=locator[6:], timeout=timeout)
+            elif locator.startswith("xpath="):
+                # pywinauto不直接支持XPath，这里做简单处理
+                return parent.child_window(title=locator[6:], timeout=timeout)
+            else:
+                return parent.child_window(title=locator, timeout=timeout)
         else:
-            return window.child_window(title=locator, timeout=timeout)
+            return parent.child_window(timeout=timeout, **locator)
     
-    def click_control(self, control: Any, button: str = "left", count: int = 1, x_offset: int = 0, y_offset: int = 0) -> bool:
+    def find_elements(self, parent: Any, locator: Any, timeout: float = 10.0) -> List[Any]:
+        """查找多个控件"""
+        # pywinauto没有直接的find_elements方法，这里返回一个包含单个元素的列表
+        return [self.find_element(parent, locator, timeout)]
+    
+    def click_element(self, element: Any, button: str = "left", clicks: int = 1, interval: float = 0.0) -> bool:
         """点击控件"""
         try:
-            if count == 1:
+            if clicks == 1:
                 if button == "left":
-                    control.click(coords=(x_offset, y_offset))
+                    element.click()
                 elif button == "right":
-                    control.right_click(coords=(x_offset, y_offset))
+                    element.right_click()
                 else:
                     return False
-            elif count == 2:
-                control.double_click(coords=(x_offset, y_offset))
+            elif clicks == 2:
+                element.double_click()
             else:
                 return False
             return True
         except Exception:
             return False
     
-    def type_into_control(self, control: Any, text: str, clear_first: bool = True, slow: bool = False, interval: float = 0.05) -> bool:
+    def type_text(self, element: Any, text: str, delay: float = 0.0) -> bool:
         """向控件输入文本"""
         try:
-            if clear_first:
-                control.set_text("")
-            
-            if slow:
+            if delay > 0:
                 for char in text:
-                    control.type_keys(char)
+                    element.type_keys(char)
                     import time
-                    time.sleep(interval)
+                    time.sleep(delay)
             else:
-                control.type_keys(text)
+                element.type_keys(text)
             return True
         except Exception:
             return False
     
-    def get_control_text(self, control: Any) -> Optional[str]:
+    def clear_element_text(self, element: Any) -> bool:
+        """清空控件文本"""
+        try:
+            element.set_text("")
+            return True
+        except Exception:
+            return False
+    
+    def set_element_text(self, element: Any, text: str) -> bool:
+        """设置控件文本"""
+        try:
+            element.set_text(text)
+            return True
+        except Exception:
+            return False
+    
+    def get_element_text(self, element: Any) -> Optional[str]:
         """获取控件文本"""
         try:
-            return control.window_text()
+            return element.window_text()
         except Exception:
             return None
+    
+    def get_element_attribute(self, element: Any, attribute: str) -> Optional[Any]:
+        """获取控件属性"""
+        try:
+            return getattr(element, attribute, None)
+        except Exception:
+            return None
+    
+    def is_control_valid(self, control: Any) -> bool:
+        """检查控件是否有效"""
+        try:
+            return control.exists()
+        except Exception:
+            return False
+    
+    def is_element_enabled(self, element: Any) -> bool:
+        """检查控件是否可用"""
+        try:
+            return element.is_enabled()
+        except Exception:
+            return False
+    
+    def is_element_visible(self, element: Any) -> bool:
+        """检查控件是否可见"""
+        try:
+            return element.is_visible()
+        except Exception:
+            return False
+    
+    def hover_element(self, element: Any) -> bool:
+        """鼠标悬停在控件上"""
+        try:
+            element.hover()
+            return True
+        except Exception:
+            return False
+    
+    def drag_element_to(self, source_element: Any, target_element: Any) -> bool:
+        """拖拽控件到目标位置"""
+        try:
+            source_element.drag_mouse_input(target_element)
+            return True
+        except Exception:
+            return False
+    
+    def select_element(self, element: Any, value: Any = None, text: Optional[str] = None, index: int = -1) -> bool:
+        """选择控件选项"""
+        try:
+            if value is not None:
+                element.select(value)
+            elif text is not None:
+                element.select(text=text)
+            elif index >= 0:
+                element.select(index=index)
+            else:
+                return False
+            return True
+        except Exception:
+            return False
+    
+    def deselect_element(self, element: Any, value: Any = None, text: Optional[str] = None, index: int = -1) -> bool:
+        """取消选择控件选项"""
+        try:
+            if value is not None:
+                element.deselect(value)
+            elif text is not None:
+                element.deselect(text=text)
+            elif index >= 0:
+                element.deselect(index=index)
+            else:
+                return False
+            return True
+        except Exception:
+            return False
+    
+    def is_element_selected(self, element: Any) -> bool:
+        """检查控件是否被选中"""
+        try:
+            return element.is_selected()
+        except Exception:
+            return False
     
     def close_application(self, app: Any, timeout: float = 10.0) -> bool:
         """关闭应用"""
@@ -233,6 +568,16 @@ class UIAutomationDriver(AutomationDriver):
     @property
     def name(self) -> str:
         return "uiautomation"
+    
+    def start_application(self, path: str, args: Optional[str] = None, backend: str = "uia") -> Any:
+        """启动应用程序"""
+        import subprocess
+        cmd = [path]
+        if args:
+            cmd.extend(args.split())
+        subprocess.Popen(cmd)
+        # UIAutomation不直接返回应用对象
+        return None
     
     def create_application(self, app_id: str, backend: str = "uia") -> Any:
         """创建UIAutomation应用对象"""
@@ -254,72 +599,161 @@ class UIAutomationDriver(AutomationDriver):
         else:
             return auto.WindowControl(**window_identifier)
     
-    def find_control(self, window: Any, locator: str, timeout: float = 10.0) -> Any:
-        """查找控件"""
-        try:
-            if locator.startswith("id="):
-                return window.Control(AutomationId=locator[3:])
-            elif locator.startswith("name="):
-                return window.Control(Name=locator[5:])
-            elif locator.startswith("class="):
-                return window.Control(ClassName=locator[6:])
-            elif locator.startswith("xpath="):
-                # UIAutomation支持XPath-like语法
-                return window.Control(searchDepth=10, Name=locator[6:])
-            else:
-                return window.Control(Name=locator)
-        except Exception:
-            import time
-            time.sleep(0.5)
-            # 重试一次
+    def find_element(self, parent: Any, locator: Any, timeout: float = 10.0) -> Any:
+        """查找单个控件"""
+        import uiautomation as auto
+        import time
+        
+        start_time = time.time()
+        while time.time() - start_time < timeout:
             try:
-                if locator.startswith("id="):
-                    return window.Control(AutomationId=locator[3:])
+                if isinstance(locator, str):
+                    if locator.startswith("id="):
+                        return parent.Control(AutomationId=locator[3:])
+                    elif locator.startswith("name="):
+                        return parent.Control(Name=locator[5:])
+                    elif locator.startswith("class="):
+                        return parent.Control(ClassName=locator[6:])
+                    elif locator.startswith("xpath="):
+                        # UIAutomation支持XPath-like语法
+                        return parent.Control(searchDepth=10, Name=locator[6:])
+                    else:
+                        return parent.Control(Name=locator)
                 else:
-                    return window.Control(Name=locator)
+                    return parent.Control(**locator)
             except Exception:
-                return None
+                time.sleep(0.5)
+        return None
     
-    def click_control(self, control: Any, button: str = "left", count: int = 1, x_offset: int = 0, y_offset: int = 0) -> bool:
+    def find_elements(self, parent: Any, locator: Any, timeout: float = 10.0) -> List[Any]:
+        """查找多个控件"""
+        # UIAutomation没有直接的find_elements方法，这里返回一个包含单个元素的列表
+        element = self.find_element(parent, locator, timeout)
+        return [element] if element else []
+    
+    def click_element(self, element: Any, button: str = "left", clicks: int = 1, interval: float = 0.0) -> bool:
         """点击控件"""
         try:
-            if count == 1:
+            if clicks == 1:
                 if button == "left":
-                    control.Click()
+                    element.Click()
                 elif button == "right":
-                    control.RightClick()
+                    element.RightClick()
                 else:
                     return False
-            elif count == 2:
-                control.DoubleClick()
+            elif clicks == 2:
+                element.DoubleClick()
             else:
                 return False
             return True
         except Exception:
             return False
     
-    def type_into_control(self, control: Any, text: str, clear_first: bool = True, slow: bool = False, interval: float = 0.05) -> bool:
+    def type_text(self, element: Any, text: str, delay: float = 0.0) -> bool:
         """向控件输入文本"""
         try:
-            if clear_first:
-                control.SendKeys("{Ctrl}a", waitTime=0.1)
-                control.SendKeys("{Delete}", waitTime=0.1)
-            
-            if slow:
+            if delay > 0:
                 for char in text:
-                    control.SendKeys(char, waitTime=interval)
+                    element.SendKeys(char, waitTime=delay)
             else:
-                control.SendKeys(text)
+                element.SendKeys(text)
             return True
         except Exception:
             return False
     
-    def get_control_text(self, control: Any) -> Optional[str]:
+    def clear_element_text(self, element: Any) -> bool:
+        """清空控件文本"""
+        try:
+            element.SendKeys("{Ctrl}a", waitTime=0.1)
+            element.SendKeys("{Delete}", waitTime=0.1)
+            return True
+        except Exception:
+            return False
+    
+    def set_element_text(self, element: Any, text: str) -> bool:
+        """设置控件文本"""
+        try:
+            self.clear_element_text(element)
+            element.SendKeys(text)
+            return True
+        except Exception:
+            return False
+    
+    def get_element_text(self, element: Any) -> Optional[str]:
         """获取控件文本"""
         try:
-            return control.Name
+            return element.Name
         except Exception:
             return None
+    
+    def get_element_attribute(self, element: Any, attribute: str) -> Optional[Any]:
+        """获取控件属性"""
+        try:
+            return getattr(element, attribute, None)
+        except Exception:
+            return None
+    
+    def is_control_valid(self, control: Any) -> bool:
+        """检查控件是否有效"""
+        try:
+            return control.Exists()
+        except Exception:
+            return False
+    
+    def is_element_enabled(self, element: Any) -> bool:
+        """检查控件是否可用"""
+        try:
+            return element.IsEnabled()
+        except Exception:
+            return False
+    
+    def is_element_visible(self, element: Any) -> bool:
+        """检查控件是否可见"""
+        try:
+            return element.IsVisible()
+        except Exception:
+            return False
+    
+    def hover_element(self, element: Any) -> bool:
+        """鼠标悬停在控件上"""
+        try:
+            element.Hover()
+            return True
+        except Exception:
+            return False
+    
+    def drag_element_to(self, source_element: Any, target_element: Any) -> bool:
+        """拖拽控件到目标位置"""
+        try:
+            source_element.DragTo(target_element)
+            return True
+        except Exception:
+            return False
+    
+    def select_element(self, element: Any, value: Any = None, text: Optional[str] = None, index: int = -1) -> bool:
+        """选择控件选项"""
+        try:
+            # UIAutomation的选择逻辑比较特殊，这里做简单处理
+            element.Select()
+            return True
+        except Exception:
+            return False
+    
+    def deselect_element(self, element: Any, value: Any = None, text: Optional[str] = None, index: int = -1) -> bool:
+        """取消选择控件选项"""
+        try:
+            # UIAutomation的取消选择逻辑比较特殊，这里做简单处理
+            element.Deselect()
+            return True
+        except Exception:
+            return False
+    
+    def is_element_selected(self, element: Any) -> bool:
+        """检查控件是否被选中"""
+        try:
+            return element.IsSelected()
+        except Exception:
+            return False
     
     def close_application(self, app: Any, timeout: float = 10.0) -> bool:
         """关闭应用"""

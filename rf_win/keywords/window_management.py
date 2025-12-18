@@ -34,6 +34,7 @@ class WindowManagementKeywords:
         self._get_window = library._get_window
         self._add_window = library._add_window
         self._remove_window = library._remove_window
+        self._window_service = library._window_service
         
     def get_main_window(self, app_id: str, window_id: Optional[str] = None) -> str:
         """获取应用的主窗口
@@ -113,7 +114,7 @@ class WindowManagementKeywords:
         if not window:
             raise ValueError(f"Window not found: {window_id}")
         
-        result = window.activate()
+        result = self._window_service.activate_window(window._window)
         logger.info(f"Activate window {window_id}: {result}")
         return result
     
@@ -140,7 +141,7 @@ class WindowManagementKeywords:
         if timeout is None:
             timeout = global_config.timeout
         
-        result = window.close(timeout)
+        result = self._window_service.close_window(window._window, timeout)
         if result:
             self._remove_window(window_id)
             logger.info(f"Closed window: {window_id}")
@@ -165,7 +166,7 @@ class WindowManagementKeywords:
         if not window:
             raise ValueError(f"Window not found: {window_id}")
         
-        result = window.maximize()
+        result = self._window_service.maximize_window(window._window)
         logger.info(f"Maximize window {window_id}: {result}")
         return result
     
@@ -185,7 +186,7 @@ class WindowManagementKeywords:
         if not window:
             raise ValueError(f"Window not found: {window_id}")
         
-        result = window.minimize()
+        result = self._window_service.minimize_window(window._window)
         logger.info(f"Minimize window {window_id}: {result}")
         return result
     
@@ -205,7 +206,7 @@ class WindowManagementKeywords:
         if not window:
             raise ValueError(f"Window not found: {window_id}")
         
-        result = window.restore()
+        result = self._window_service.restore_window(window._window)
         logger.info(f"Restore window {window_id}: {result}")
         return result
     
@@ -227,7 +228,11 @@ class WindowManagementKeywords:
         if not window:
             raise ValueError(f"Window not found: {window_id}")
         
-        result = window.resize(width, height)
+        rect = window.get_rect()
+        if not rect:
+            return False
+        
+        result = self._window_service.set_window_rect(window._window, rect[0], rect[1], width, height)
         logger.info(f"Resize window {window_id} to {width}x{height}: {result}")
         return result
     
@@ -249,7 +254,11 @@ class WindowManagementKeywords:
         if not window:
             raise ValueError(f"Window not found: {window_id}")
         
-        result = window.move(x, y)
+        rect = window.get_rect()
+        if not rect:
+            return False
+        
+        result = self._window_service.set_window_rect(window._window, x, y, rect[2], rect[3])
         logger.info(f"Move window {window_id} to ({x}, {y}): {result}")
         return result
     
@@ -269,7 +278,7 @@ class WindowManagementKeywords:
         if not window:
             raise ValueError(f"Window not found: {window_id}")
         
-        return window.get_title()
+        return self._window_service.get_window_title(window._window)
     
     def get_window_rect(self, window_id: str) -> Optional[List[int]]:
         """获取窗口矩形区域
@@ -287,9 +296,9 @@ class WindowManagementKeywords:
         if not window:
             raise ValueError(f"Window not found: {window_id}")
         
-        rect = window.get_rect()
-        if rect:
-            return list(rect)
+        rect_dict = self._window_service.get_window_rect(window._window)
+        if rect_dict:
+            return [rect_dict["x"], rect_dict["y"], rect_dict["width"], rect_dict["height"]]
         return None
     
     def wait_for_window_close(self, window_id: str, timeout: Optional[float] = None) -> bool:
@@ -314,7 +323,7 @@ class WindowManagementKeywords:
         if timeout is None:
             timeout = global_config.timeout
         
-        result = window.wait_for_close(timeout)
+        result = self._window_service.wait_for_window_close(window._window, timeout)
         if result:
             self._remove_window(window_id)
         logger.info(f"Wait for window {window_id} close: {result}")
@@ -336,7 +345,7 @@ class WindowManagementKeywords:
         if not window:
             raise ValueError(f"Window not found: {window_id}")
         
-        return window.is_active()
+        return self._window_service.is_window_active(window._window)
     
     def is_window_visible(self, window_id: str) -> bool:
         """检查窗口是否可见
@@ -354,7 +363,7 @@ class WindowManagementKeywords:
         if not window:
             raise ValueError(f"Window not found: {window_id}")
         
-        return window.is_visible()
+        return self._window_service.is_window_visible(window._window)
     
     def is_window_closed(self, window_id: str) -> bool:
         """检查窗口是否已关闭
@@ -372,7 +381,7 @@ class WindowManagementKeywords:
         if not window:
             return True
         
-        result = window.is_closed()
+        result = self._window_service.is_window_closed(window._window)
         if result:
             self._remove_window(window_id)
         return result

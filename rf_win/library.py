@@ -52,6 +52,9 @@ class RFWinLibrary:
         # 操作对象
         self._operation: Optional[BaseOperation] = None
         
+        # 初始化服务层
+        self._init_services()
+        
         # 初始化操作对象
         self._init_operation()
         
@@ -60,6 +63,19 @@ class RFWinLibrary:
         
         # 注册关键字
         self._register_keywords()
+    
+    def _init_services(self) -> None:
+        """初始化服务层
+        
+        创建并初始化各服务实例，用于封装业务逻辑
+        """
+        from .services.application_service import ApplicationService
+        from .services.window_service import WindowService
+        from .services.control_service import ControlService
+        
+        self._application_service = ApplicationService()
+        self._window_service = WindowService()
+        self._control_service = ControlService()
     
     def _init_config(self, **kwargs: Any) -> None:
         """初始化配置

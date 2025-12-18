@@ -5,7 +5,7 @@ from .pywinauto_backend import PywinautoBackend, PywinautoApplication, Pywinauto
 
 # 尝试导入UIAutomation后端，处理导入错误
 try:
-    from .uiautomation_backend import UIAutomationBackend
+    from .uiautomation_backend import UIAutomationBackend  # type: ignore[import-not-found]
     __all__ = [
         "backend_factory",
         "Backend",

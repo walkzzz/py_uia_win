@@ -31,6 +31,7 @@ class ApplicationManagementKeywords:
         self._get_application = library._get_application
         self._add_application = library._add_application
         self._remove_application = library._remove_application
+        self._application_service = library._application_service
         
     def start_application(self, path: str, app_id: Optional[str] = None, args: Optional[str] = None, admin: bool = False, background: bool = False, backend: Optional[str] = None) -> str:
         """启动应用
@@ -55,15 +56,17 @@ class ApplicationManagementKeywords:
         if app_id is None:
             app_id = f"app_{int(time.time())}"
         
-        backend_instance = self._get_backend(backend)
-        app = backend_instance.create_application(app_id)
+        # 使用服务层启动应用
+        app = self._application_service.start_application(path, args, backend or "pywinauto")
         
-        if app.start(path, args, admin, background):
-            self._add_application(app_id, app)
-            logger.info(f"Started application: {path} with app_id: {app_id}")
-            return app_id
-        else:
-            raise RuntimeError(f"Failed to start application: {path}")
+        # 创建应用对象并添加到管理器
+        backend_instance = self._get_backend(backend)
+        app_obj = backend_instance.create_application(app_id)
+        app_obj._app = app  # 直接设置内部应用对象
+        
+        self._add_application(app_id, app_obj)
+        logger.info(f"Started application: {path} with app_id: {app_id}")
+        return app_id
     
     def attach_to_application(self, identifier: Any, app_id: Optional[str] = None, backend: Optional[str] = None) -> str:
         """附加到已运行的应用
@@ -85,15 +88,17 @@ class ApplicationManagementKeywords:
         if app_id is None:
             app_id = f"app_{int(time.time())}"
         
-        backend_instance = self._get_backend(backend)
-        app = backend_instance.create_application(app_id)
+        # 使用服务层连接到应用
+        app = self._application_service.attach_to_application(identifier, backend or "pywinauto")
         
-        if app.attach(identifier):
-            self._add_application(app_id, app)
-            logger.info(f"Attached to application: {identifier} with app_id: {app_id}")
-            return app_id
-        else:
-            raise RuntimeError(f"Failed to attach to application: {identifier}")
+        # 创建应用对象并添加到管理器
+        backend_instance = self._get_backend(backend)
+        app_obj = backend_instance.create_application(app_id)
+        app_obj._app = app  # 直接设置内部应用对象
+        
+        self._add_application(app_id, app_obj)
+        logger.info(f"Attached to application: {identifier} with app_id: {app_id}")
+        return app_id
     
     def close_application(self, app_id: str, timeout: Optional[float] = None) -> bool:
         """优雅关闭应用
@@ -118,7 +123,8 @@ class ApplicationManagementKeywords:
         if timeout is None:
             timeout = global_config.timeout
         
-        result = app.close(timeout)
+        # 使用服务层关闭应用
+        result = self._application_service.close_application(app._app, timeout)
         if result:
             self._remove_application(app_id)
             logger.info(f"Closed application: {app_id}")
@@ -143,7 +149,8 @@ class ApplicationManagementKeywords:
         if not app:
             raise ValueError(f"Application not found: {app_id}")
         
-        result = app.kill()
+        # 使用服务层强制关闭应用
+        result = self._application_service.kill_application(app._app)
         if result:
             self._remove_application(app_id)
             logger.info(f"Killed application: {app_id}")
@@ -168,7 +175,8 @@ class ApplicationManagementKeywords:
         if not app:
             return False
         
-        result = app.is_running()
+        # 使用服务层检查应用是否运行
+        result = self._application_service.check_application_running(app._app)
         logger.info(f"Application {app_id} is running: {result}")
         return result
     
@@ -188,7 +196,8 @@ class ApplicationManagementKeywords:
         if not app:
             raise ValueError(f"Application not found: {app_id}")
         
-        return app.get_process_id()
+        # 使用服务层获取进程ID
+        return self._application_service.get_application_process_id(app._app)
     
     def wait_for_application_main_window(self, app_id: str, timeout: Optional[float] = None) -> bool:
         """等待应用主窗口出现
@@ -212,6 +221,12 @@ class ApplicationManagementKeywords:
         if timeout is None:
             timeout = global_config.timeout
         
-        result = app.wait_for_main_window(timeout)
+        try:
+            # 使用服务层等待主窗口
+            self._application_service.wait_for_application_main_window(app._app, timeout)
+            result = True
+        except TimeoutError:
+            result = False
+        
         logger.info(f"Wait for application {app_id} main window: {result}")
         return result

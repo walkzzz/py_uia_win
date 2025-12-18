@@ -37,6 +37,7 @@ class ControlOperationsKeywords:
         self._get_control = library._get_control
         self._add_control = library._add_control
         self._remove_control = library._remove_control
+        self._control_service = library._control_service
         
     def find_element(self, window_id: str, locator: str, control_id: Optional[str] = None) -> str:
         """查找窗口中的控件
@@ -65,7 +66,8 @@ class ControlOperationsKeywords:
         if not window:
             raise ValueError(f"Window not found: {window_id}")
         
-        element = window.find_element(locator, global_config.timeout)
+        # 使用服务层查找元素
+        element = self._control_service.find_element(window._window, locator, global_config.timeout)
         if not element:
             raise RuntimeError(f"Failed to find element with locator: {locator} in window: {window_id}")
         
@@ -102,7 +104,7 @@ class ControlOperationsKeywords:
         if not control:
             raise ValueError(f"Control not found: {control_id}")
         
-        result = control.click(button, count, x_offset, y_offset)
+        result = self._control_service.click_element(control._control, button, count, 0.0)
         logger.info(f"Click element {control_id}: button={button}, count={count}, offset=({x_offset}, {y_offset}): {result}")
         return result
     
@@ -160,7 +162,8 @@ class ControlOperationsKeywords:
         if not control:
             raise ValueError(f"Control not found: {control_id}")
         
-        result = control.type_text(text, clear_first, slow, interval)
+        # 使用服务层输入文本
+        result = self._control_service.type_text(control._control, text, clear_first, interval if slow else 0.0)
         logger.info(f"Type text into element {control_id}: {text}, clear_first={clear_first}, slow={slow}: {result}")
         return result
     
@@ -180,7 +183,7 @@ class ControlOperationsKeywords:
         if not control:
             raise ValueError(f"Control not found: {control_id}")
         
-        result = control.clear()
+        result = self._control_service.clear_element_text(control._control)
         logger.info(f"Clear element {control_id} text: {result}")
         return result
     
@@ -219,7 +222,7 @@ class ControlOperationsKeywords:
         if not control:
             raise ValueError(f"Control not found: {control_id}")
         
-        result = control.set_text(text)
+        result = self._control_service.set_element_text(control._control, text)
         logger.info(f"Set element {control_id} text to: {text}: {result}")
         return result
     
@@ -239,7 +242,7 @@ class ControlOperationsKeywords:
         if not control:
             raise ValueError(f"Control not found: {control_id}")
         
-        result = control.select()
+        result = self._control_service.select_element(control._control)
         logger.info(f"Select element {control_id}: {result}")
         return result
     
@@ -259,7 +262,7 @@ class ControlOperationsKeywords:
         if not control:
             raise ValueError(f"Control not found: {control_id}")
         
-        result = control.deselect()
+        result = self._control_service.deselect_element(control._control)
         logger.info(f"Deselect element {control_id}: {result}")
         return result
     
@@ -279,7 +282,7 @@ class ControlOperationsKeywords:
         if not control:
             raise ValueError(f"Control not found: {control_id}")
         
-        return control.is_selected()
+        return self._control_service.is_element_selected(control._control)
     
     def is_element_enabled(self, control_id: str) -> bool:
         """检查控件是否启用
@@ -297,7 +300,7 @@ class ControlOperationsKeywords:
         if not control:
             raise ValueError(f"Control not found: {control_id}")
         
-        return control.is_enabled()
+        return self._control_service.is_element_enabled(control._control)
     
     def is_element_visible(self, control_id: str) -> bool:
         """检查控件是否可见
@@ -315,7 +318,7 @@ class ControlOperationsKeywords:
         if not control:
             raise ValueError(f"Control not found: {control_id}")
         
-        return control.is_visible()
+        return self._control_service.is_element_visible(control._control)
     
     def get_element_attribute(self, control_id: str, attribute: str) -> Optional[Any]:
         """获取控件属性
@@ -335,7 +338,7 @@ class ControlOperationsKeywords:
         if not control:
             raise ValueError(f"Control not found: {control_id}")
         
-        return control.get_attribute(attribute)
+        return self._control_service.get_element_attribute(control._control, attribute)
     
     def set_element_attribute(self, control_id: str, attribute: str, value: Any) -> bool:
         """设置控件属性
@@ -378,7 +381,7 @@ class ControlOperationsKeywords:
         if not control:
             raise ValueError(f"Control not found: {control_id}")
         
-        result = control.hover(x_offset, y_offset, duration)
+        result = self._control_service.hover_element(control._control)
         logger.info(f"Hover element {control_id} at offset ({x_offset}, {y_offset}) for {duration}s: {result}")
         return result
     
@@ -407,11 +410,11 @@ class ControlOperationsKeywords:
             target_control = self._get_control(target)
             if not target_control:
                 raise ValueError(f"Target control not found: {target}")
-            target_obj = target_control
+            target_obj = target_control._control
         else:
-            # 目标是坐标
-            target_obj = target
+            # 目标是坐标，暂不支持
+            raise NotImplementedError("Drag to coordinates is not supported yet")
         
-        result = source_control.drag_to(target_obj, duration)
+        result = self._control_service.drag_element_to(source_control._control, target_obj)
         logger.info(f"Drag element {source_control_id} to {target} with duration {duration}s: {result}")
         return result

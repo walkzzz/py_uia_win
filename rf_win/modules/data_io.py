@@ -188,11 +188,11 @@ class DataIO:
             for row in rows[1:]:
                 # 处理行长度与表头长度不匹配的情况
                 row_dict = {}
-                for i, header in enumerate(headers):
+                for i, col_header in enumerate(headers):
                     if i < len(row):
-                        row_dict[header] = row[i]
+                        row_dict[col_header] = row[i]
                     else:
-                        row_dict[header] = ""
+                        row_dict[col_header] = ""
                 data.append(row_dict)
             return data
         else:
@@ -232,7 +232,9 @@ class DataIO:
 
                 # 写入数据
                 for row in data:
-                    writer.writerow([row.get(h, "") for h in header])  # type: ignore[arg-type]
+                    # 明确断言row是字典类型，因为上面已经检查过data[0]是字典
+                    dict_row = row  # type: ignore[assignment]
+                    writer.writerow([dict_row.get(h, "") for h in header])  # type: ignore[arg-type]
             else:
                 # 数据是列表列表
                 if header:
@@ -291,11 +293,11 @@ class DataIO:
             for row in data[1:]:
                 # 处理行长度与表头长度不匹配的情况
                 row_dict = {}
-                for i, header in enumerate(headers):
+                for i, col_header in enumerate(headers):
                     if i < len(row) and row[i] is not None:
-                        row_dict[header] = row[i]
+                        row_dict[col_header] = row[i]
                     else:
-                        row_dict[header] = ""
+                        row_dict[col_header] = ""
                 rows.append(row_dict)
             return rows
         else:
@@ -342,7 +344,9 @@ class DataIO:
 
             # 写入数据
             for row in data:
-                ws.append([row.get(h, "") for h in header])
+                # 明确断言row是字典类型
+                dict_row = row  # type: ignore[assignment]
+                ws.append([dict_row.get(h, "") for h in header])
         else:
             # 数据是列表列表
             if header:
@@ -394,7 +398,9 @@ class DataIO:
 
             # 写入数据
             for row in data:
-                ws.append([row.get(h, "") for h in headers])
+                # 明确断言row是字典类型
+                dict_row = row  # type: ignore[assignment]
+                ws.append([dict_row.get(h, "") for h in headers])
         else:
             # 数据是列表列表
             for row in data:

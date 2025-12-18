@@ -1,7 +1,7 @@
 # pywinauto后端实现
 # 封装pywinauto库的功能，提供统一的接口给上层使用
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 import time
 import subprocess
 import psutil
@@ -400,7 +400,7 @@ class PywinautoWindow(BaseWindow):
         
         return locator_dict
     
-    def find_element(self, locator: str, timeout: float = None) -> Any:
+    def find_element(self, locator: str, timeout: Optional[float] = None) -> Any:
         """查找窗口中的控件"""
         if not self._window:
             return None
@@ -415,7 +415,7 @@ class PywinautoWindow(BaseWindow):
         except Exception as e:
             return None
     
-    def find_elements(self, locator: str, timeout: float = None) -> List[Any]:
+    def find_elements(self, locator: str, timeout: Optional[float] = None) -> List[Any]:
         """查找窗口中的所有匹配控件"""
         if not self._window:
             return []
@@ -463,7 +463,7 @@ class PywinautoWindow(BaseWindow):
 class PywinautoControl(BaseControl):
     """pywinauto控件实现"""
     
-    def __init__(self, control_id: str, window: Any, config: Dict[str, Any] = None):
+    def __init__(self, control_id: str, window: Any, config: Optional[Dict[str, Any]] = None):
         super().__init__(control_id, window, config)
         self._control: Optional[BaseWrapper] = None
         self._parse_control_id(control_id)
@@ -781,7 +781,7 @@ class PywinautoControl(BaseControl):
         except Exception as e:
             return False
     
-    def find_element(self, locator: str, timeout: float = None) -> Any:
+    def find_element(self, locator: str, timeout: Optional[float] = None) -> Any:
         """在控件中查找子控件"""
         if not self._control:
             return None
@@ -797,7 +797,7 @@ class PywinautoControl(BaseControl):
         except Exception as e:
             return None
     
-    def find_elements(self, locator: str, timeout: float = None) -> List[Any]:
+    def find_elements(self, locator: str, timeout: Optional[float] = None) -> List[Any]:
         """在控件中查找所有匹配的子控件"""
         if not self._control:
             return []
@@ -1057,7 +1057,7 @@ class PywinautoOperation(BaseOperation):
         """等待指定时长"""
         time.sleep(seconds)
     
-    def wait_until(self, condition_func: callable, timeout: float = 10.0, interval: float = 0.5) -> bool:
+    def wait_until(self, condition_func: Callable[[], bool], timeout: float = 10.0, interval: float = 0.5) -> bool:
         """等待直到条件满足或超时"""
         start_time = time.time()
         while time.time() - start_time < timeout:
@@ -1099,15 +1099,15 @@ class PywinautoOperation(BaseOperation):
 class PywinautoBackend(Backend):
     """pywinauto后端"""
     
-    def create_application(self, app_id: str, config: Dict[str, Any] = None) -> Any:
+    def create_application(self, app_id: str, config: Optional[Dict[str, Any]] = None) -> Any:
         """创建应用对象"""
         return PywinautoApplication(app_id, config)
     
-    def create_window(self, window_id: str, application: Any, config: Dict[str, Any] = None) -> Any:
+    def create_window(self, window_id: str, application: Any, config: Optional[Dict[str, Any]] = None) -> Any:
         """创建窗口对象"""
         return PywinautoWindow(window_id, application, config)
     
-    def create_control(self, control_id: str, window: Any, config: Dict[str, Any] = None) -> Any:
+    def create_control(self, control_id: str, window: Any, config: Optional[Dict[str, Any]] = None) -> Any:
         """创建控件对象"""
         return PywinautoControl(control_id, window, config)
     
