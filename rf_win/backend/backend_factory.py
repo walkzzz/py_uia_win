@@ -75,7 +75,7 @@ class BackendFactory:
         """
         self._backends[name] = backend
     
-    def get_backend(self, name: str = None) -> Backend:
+    def get_backend(self, name: Optional[str] = None) -> Backend:
         """获取后端对象
         
         Args:

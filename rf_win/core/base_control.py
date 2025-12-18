@@ -266,7 +266,7 @@ class BaseControl(ABC):
         pass
     
     @abstractmethod
-    def find_element(self, locator: str, timeout: float = None) -> Any:
+    def find_element(self, locator: str, timeout: Optional[float] = None) -> Any:
         """在控件中查找子控件
         
         Args:
@@ -279,7 +279,7 @@ class BaseControl(ABC):
         pass
     
     @abstractmethod
-    def find_elements(self, locator: str, timeout: float = None) -> List[Any]:
+    def find_elements(self, locator: str, timeout: Optional[float] = None) -> List[Any]:
         """在控件中查找所有匹配的子控件
         
         Args:
