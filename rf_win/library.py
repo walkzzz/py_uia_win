@@ -10,7 +10,7 @@ from robot.libraries.BuiltIn import BuiltIn
 
 from .config.global_config import global_config, CONFIG_KEY_MAP
 from .config.local_config import local_config
-from .backend.backend_factory import backend_factory
+from .drivers.automation_driver import driver_factory
 from .core.base_application import BaseApplication
 from .core.base_window import BaseWindow
 from .core.base_control import BaseControl
@@ -134,14 +134,15 @@ class RFWinLibrary:
         # 从初始化参数加载配置
         global_config.update(**kwargs)
         
-        # 设置默认后端
-        backend_factory.set_default_backend(global_config.default_backend)
+        # 设置默认驱动
+        driver_factory.set_default_driver(global_config.default_backend)
         
         logger.info(f"RFWinLibrary initialized with config: {{'timeout': {global_config.timeout}, 'retry': {global_config.retry}, 'default_backend': '{global_config.default_backend}', 'pywinauto_backend': '{global_config.pywinauto_backend}', 'auto_screenshot_on_fail': {global_config.auto_screenshot_on_fail}, 'high_dpi_adapter': {global_config.high_dpi_adapter}}}")
     
     def _init_operation(self) -> None:
         """初始化操作对象"""
-        self._operation = backend_factory.get_backend().create_operation()
+        # 操作对象直接使用driver_factory获取的驱动
+        self._operation = driver_factory.get_driver()
     
     def _init_logger(self) -> None:
         """初始化日志"""
@@ -321,15 +322,15 @@ class RFWinLibrary:
             del self._controls[control_id]
     
     def _get_backend(self, backend_name: Optional[str] = None) -> Any:
-        """获取后端对象
+        """获取后端对象（兼容旧接口，实际返回驱动）
         
         Args:
             backend_name: 后端名称，默认使用全局配置
         
         Returns:
-            后端对象
+            驱动对象
         """
-        return backend_factory.get_backend(backend_name)
+        return driver_factory.get_driver(backend_name)
     
     # ===================
     # 配置管理关键字
@@ -378,7 +379,7 @@ class RFWinLibrary:
         Example:
             | Set Backend | pywinauto |
         """
-        backend_factory.set_default_backend(backend_name)
+        driver_factory.set_default_driver(backend_name)
         logger.info(f"Set default backend to: {backend_name}")
     
     def get_available_backends(self) -> List[str]:
@@ -390,5 +391,5 @@ class RFWinLibrary:
         Example:
             | ${backends} | Get Available Backends |
         """
-        return backend_factory.get_available_backends()
+        return driver_factory.get_available_drivers()
     

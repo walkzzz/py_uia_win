@@ -32,7 +32,7 @@ class ControlService:
         # 尝试从缓存中获取
         cache_key = f"{id(parent)}:{str(locator)}:{timeout}"
         cached_element = self._cache.get(cache_key)
-        if cached_element and self._driver.is_control_valid(cached_element):
+        if cached_element and self._driver.is_element_valid(cached_element):
             logger.info(f"Found element from cache: {cached_element}")
             return cached_element
         

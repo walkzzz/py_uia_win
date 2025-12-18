@@ -51,12 +51,7 @@ class ApplicationService:
             是否成功
         """
         logger.info(f"Closing application: {app}")
-        try:
-            app.kill(timeout=timeout)
-            return True
-        except Exception as e:
-            logger.error(f"Failed to close application: {e}")
-            return False
+        return self._driver.close_application(app, timeout)
     
     def kill_application(self, app: Any) -> bool:
         """强制终止应用程序
@@ -68,12 +63,8 @@ class ApplicationService:
             是否成功
         """
         logger.info(f"Killing application: {app}")
-        try:
-            app.kill()
-            return True
-        except Exception as e:
-            logger.error(f"Failed to kill application: {e}")
-            return False
+        # 对于kill操作，直接调用close_application，驱动会处理强制终止逻辑
+        return self._driver.close_application(app, 0)
     
     def check_application_running(self, app: Any) -> bool:
         """检查应用程序是否正在运行
@@ -84,8 +75,16 @@ class ApplicationService:
         Returns:
             是否正在运行
         """
+        logger.info(f"Checking application running status: {app}")
         try:
-            return app.is_process_running()
+            # 这里简单检查app对象是否还能响应
+            # 实际实现可能需要根据驱动类型进行调整
+            if hasattr(app, 'is_process_running'):
+                return app.is_process_running()
+            elif hasattr(app, 'process_id'):
+                return app.process_id() is not None
+            else:
+                return True
         except Exception as e:
             logger.error(f"Failed to check application running status: {e}")
             return False
@@ -99,8 +98,16 @@ class ApplicationService:
         Returns:
             进程ID
         """
+        logger.info(f"Getting application process ID: {app}")
         try:
-            return app.process_id()
+            if hasattr(app, 'process_id'):
+                return app.process_id()
+            elif hasattr(app, '_process_id'):
+                return app._process_id
+            elif hasattr(app, 'process'):
+                return app.process.id
+            else:
+                return None
         except Exception as e:
             logger.error(f"Failed to get application process ID: {e}")
             return None
@@ -121,12 +128,15 @@ class ApplicationService:
         logger.info(f"Waiting for application main window: {app}")
         import time
         start_time = time.time()
+        
         while time.time() - start_time < timeout:
             try:
-                main_window = app.window(title_re="", class_name_re="")
-                if main_window.exists():
+                # 使用驱动的find_window方法查找主窗口
+                main_window = self._driver.find_window(app, {})
+                if main_window:
                     return main_window
             except Exception:
                 pass
             time.sleep(0.5)
+        
         raise TimeoutError(f"Main window not found within timeout: {timeout}s")

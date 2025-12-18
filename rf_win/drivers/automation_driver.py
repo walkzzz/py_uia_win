@@ -29,19 +29,6 @@ class AutomationDriver(ABC):
         pass
     
     @abstractmethod
-    def create_application(self, app_id: str, backend: str = "uia") -> Any:
-        """创建应用对象
-        
-        Args:
-            app_id: 应用ID
-            backend: 后端类型
-        
-        Returns:
-            应用对象
-        """
-        pass
-    
-    @abstractmethod
     def connect_to_application(self, identifier: Any, backend: str = "uia") -> Any:
         """连接到已运行的应用
         
@@ -51,6 +38,32 @@ class AutomationDriver(ABC):
         
         Returns:
             应用对象
+        """
+        pass
+    
+    @abstractmethod
+    def close_application(self, app: Any, timeout: float = 10.0) -> bool:
+        """关闭应用
+        
+        Args:
+            app: 应用对象
+            timeout: 超时时间
+        
+        Returns:
+            是否成功
+        """
+        pass
+    
+    @abstractmethod
+    def find_window(self, app: Any, window_identifier: Any) -> Any:
+        """查找窗口
+        
+        Args:
+            app: 应用对象
+            window_identifier: 窗口标识符
+        
+        Returns:
+            窗口对象
         """
         pass
     
@@ -83,7 +96,7 @@ class AutomationDriver(ABC):
         pass
     
     @abstractmethod
-    def click_element(self, element: Any, button: str = "left", clicks: int = 1, interval: float = 0.0) -> bool:
+    def click_element(self, element: Any, button: str = "left", clicks: int = 1, interval: float = 0.0, x_offset: int = 0, y_offset: int = 0) -> bool:
         """点击控件
         
         Args:
@@ -91,6 +104,8 @@ class AutomationDriver(ABC):
             button: 鼠标按钮
             clicks: 点击次数
             interval: 点击间隔
+            x_offset: X偏移
+            y_offset: Y偏移
         
         Returns:
             是否成功
@@ -98,12 +113,13 @@ class AutomationDriver(ABC):
         pass
     
     @abstractmethod
-    def type_text(self, element: Any, text: str, delay: float = 0.0) -> bool:
+    def type_text(self, element: Any, text: str, clear_first: bool = True, delay: float = 0.0) -> bool:
         """向控件输入文本
         
         Args:
             element: 控件对象
             text: 要输入的文本
+            clear_first: 是否先清空
             delay: 输入延迟
         
         Returns:
@@ -117,19 +133,6 @@ class AutomationDriver(ABC):
         
         Args:
             element: 控件对象
-        
-        Returns:
-            是否成功
-        """
-        pass
-    
-    @abstractmethod
-    def set_element_text(self, element: Any, text: str) -> bool:
-        """设置控件文本
-        
-        Args:
-            element: 控件对象
-            text: 要设置的文本
         
         Returns:
             是否成功
@@ -162,11 +165,11 @@ class AutomationDriver(ABC):
         pass
     
     @abstractmethod
-    def is_control_valid(self, control: Any) -> bool:
+    def is_element_valid(self, element: Any) -> bool:
         """检查控件是否有效
         
         Args:
-            control: 控件对象
+            element: 控件对象
         
         Returns:
             是否有效
@@ -263,90 +266,6 @@ class AutomationDriver(ABC):
             是否被选中
         """
         pass
-    
-    @abstractmethod
-    def find_window(self, app: Any, window_identifier: Any) -> Any:
-        """查找窗口
-        
-        Args:
-            app: 应用对象
-            window_identifier: 窗口标识符
-        
-        Returns:
-            窗口对象
-        """
-        pass
-    
-    @abstractmethod
-    def find_control(self, window: Any, locator: str, timeout: float = 10.0) -> Any:
-        """查找控件
-        
-        Args:
-            window: 窗口对象
-            locator: 控件定位器
-            timeout: 超时时间
-        
-        Returns:
-            控件对象
-        """
-        pass
-    
-    @abstractmethod
-    def click_control(self, control: Any, button: str = "left", count: int = 1, x_offset: int = 0, y_offset: int = 0) -> bool:
-        """点击控件
-        
-        Args:
-            control: 控件对象
-            button: 鼠标按钮
-            count: 点击次数
-            x_offset: X偏移
-            y_offset: Y偏移
-        
-        Returns:
-            是否成功
-        """
-        pass
-    
-    @abstractmethod
-    def type_into_control(self, control: Any, text: str, clear_first: bool = True, slow: bool = False, interval: float = 0.05) -> bool:
-        """向控件输入文本
-        
-        Args:
-            control: 控件对象
-            text: 要输入的文本
-            clear_first: 是否先清空
-            slow: 是否慢速输入
-            interval: 输入间隔
-        
-        Returns:
-            是否成功
-        """
-        pass
-    
-    @abstractmethod
-    def get_control_text(self, control: Any) -> Optional[str]:
-        """获取控件文本
-        
-        Args:
-            control: 控件对象
-        
-        Returns:
-            控件文本
-        """
-        pass
-    
-    @abstractmethod
-    def close_application(self, app: Any, timeout: float = 10.0) -> bool:
-        """关闭应用
-        
-        Args:
-            app: 应用对象
-            timeout: 超时时间
-        
-        Returns:
-            是否成功
-        """
-        pass
 
 class PywinautoDriver(AutomationDriver):
     """pywinauto驱动实现"""
@@ -363,11 +282,6 @@ class PywinautoDriver(AutomationDriver):
         if args:
             cmd += f" {args}"
         return app.start(cmd)
-    
-    def create_application(self, app_id: str, backend: str = "uia") -> Any:
-        """创建pywinauto应用对象"""
-        from pywinauto import Application as PywinautoApp
-        return PywinautoApp(backend=backend)
     
     def connect_to_application(self, identifier: Any, backend: str = "uia") -> Any:
         """连接到已运行的应用"""
@@ -418,7 +332,7 @@ class PywinautoDriver(AutomationDriver):
         # pywinauto没有直接的find_elements方法，这里返回一个包含单个元素的列表
         return [self.find_element(parent, locator, timeout)]
     
-    def click_element(self, element: Any, button: str = "left", clicks: int = 1, interval: float = 0.0) -> bool:
+    def click_element(self, element: Any, button: str = "left", clicks: int = 1, interval: float = 0.0, x_offset: int = 0, y_offset: int = 0) -> bool:
         """点击控件"""
         try:
             if clicks == 1:
@@ -436,9 +350,12 @@ class PywinautoDriver(AutomationDriver):
         except Exception:
             return False
     
-    def type_text(self, element: Any, text: str, delay: float = 0.0) -> bool:
+    def type_text(self, element: Any, text: str, clear_first: bool = True, delay: float = 0.0) -> bool:
         """向控件输入文本"""
         try:
+            if clear_first:
+                self.clear_element_text(element)
+            
             if delay > 0:
                 for char in text:
                     element.type_keys(char)
@@ -458,14 +375,6 @@ class PywinautoDriver(AutomationDriver):
         except Exception:
             return False
     
-    def set_element_text(self, element: Any, text: str) -> bool:
-        """设置控件文本"""
-        try:
-            element.set_text(text)
-            return True
-        except Exception:
-            return False
-    
     def get_element_text(self, element: Any) -> Optional[str]:
         """获取控件文本"""
         try:
@@ -480,10 +389,10 @@ class PywinautoDriver(AutomationDriver):
         except Exception:
             return None
     
-    def is_control_valid(self, control: Any) -> bool:
+    def is_element_valid(self, element: Any) -> bool:
         """检查控件是否有效"""
         try:
-            return control.exists()
+            return element.exists()
         except Exception:
             return False
     
@@ -579,11 +488,6 @@ class UIAutomationDriver(AutomationDriver):
         # UIAutomation不直接返回应用对象
         return None
     
-    def create_application(self, app_id: str, backend: str = "uia") -> Any:
-        """创建UIAutomation应用对象"""
-        # UIAutomation不直接使用应用对象，这里返回None
-        return None
-    
     def connect_to_application(self, identifier: Any, backend: str = "uia") -> Any:
         """连接到已运行的应用"""
         # UIAutomation不直接使用应用对象，这里返回None
@@ -631,7 +535,7 @@ class UIAutomationDriver(AutomationDriver):
         element = self.find_element(parent, locator, timeout)
         return [element] if element else []
     
-    def click_element(self, element: Any, button: str = "left", clicks: int = 1, interval: float = 0.0) -> bool:
+    def click_element(self, element: Any, button: str = "left", clicks: int = 1, interval: float = 0.0, x_offset: int = 0, y_offset: int = 0) -> bool:
         """点击控件"""
         try:
             if clicks == 1:
@@ -649,9 +553,12 @@ class UIAutomationDriver(AutomationDriver):
         except Exception:
             return False
     
-    def type_text(self, element: Any, text: str, delay: float = 0.0) -> bool:
+    def type_text(self, element: Any, text: str, clear_first: bool = True, delay: float = 0.0) -> bool:
         """向控件输入文本"""
         try:
+            if clear_first:
+                self.clear_element_text(element)
+                
             if delay > 0:
                 for char in text:
                     element.SendKeys(char, waitTime=delay)
@@ -670,15 +577,6 @@ class UIAutomationDriver(AutomationDriver):
         except Exception:
             return False
     
-    def set_element_text(self, element: Any, text: str) -> bool:
-        """设置控件文本"""
-        try:
-            self.clear_element_text(element)
-            element.SendKeys(text)
-            return True
-        except Exception:
-            return False
-    
     def get_element_text(self, element: Any) -> Optional[str]:
         """获取控件文本"""
         try:
@@ -693,10 +591,10 @@ class UIAutomationDriver(AutomationDriver):
         except Exception:
             return None
     
-    def is_control_valid(self, control: Any) -> bool:
+    def is_element_valid(self, element: Any) -> bool:
         """检查控件是否有效"""
         try:
-            return control.Exists()
+            return element.Exists()
         except Exception:
             return False
     
@@ -798,6 +696,14 @@ class DriverFactory:
         if name is None:
             name = self._default_driver
         
+        if name == "auto":
+            # 自动选择驱动，默认使用pywinauto
+            if "pywinauto" in self._drivers:
+                return self._drivers["pywinauto"]
+            elif "uiautomation" in self._drivers:
+                return self._drivers["uiautomation"]
+            raise ValueError("No driver available for auto selection")
+        
         if name not in self._drivers:
             raise ValueError(f"Driver {name} not available")
         
@@ -812,7 +718,7 @@ class DriverFactory:
         Raises:
             ValueError: 如果驱动不存在
         """
-        if name not in self._drivers:
+        if name != "auto" and name not in self._drivers:
             raise ValueError(f"Driver {name} not available")
         
         self._default_driver = name
